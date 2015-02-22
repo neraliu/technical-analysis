@@ -8,8 +8,7 @@ Authors: Nera Liu <neraliu@yahoo-inc.com>
 (function () {
 
     var mocha = require("mocha"),
-        expect = require('chai').expect,
-        promise = require('promise');
+        expect = require('chai').expect;
 
     var TA = require("../../src/technical-analysis").TechnicalAnalysis;
 
