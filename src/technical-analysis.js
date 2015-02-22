@@ -15,19 +15,16 @@ function TechnicalAnalysis() {
 TechnicalAnalysis.prototype.movingAverage = function(d, t) {
     if (d.length >= t && d.constructor === Array) {
         var r = [],
-            s = 0,
-            c = 1;
+            s = 0;
+
         for(var i=0;i<d.length;++i) {
-            if (c-1 < t) {
-                s += d[i];
-                if (c === t) {
-                    r.push(Math.round((s*this.decimalRoundingFactor)/t)/this.decimalRoundingFactor);
-                } else {
-                    r.push(NaN);
-                }
-                ++c;
+            s += d[i];
+
+            if (i < t-1) {
+                r.push(NaN);
+            } else if (i+1 === t) {
+                r.push(Math.round((s*this.decimalRoundingFactor)/t)/this.decimalRoundingFactor);
             } else {
-                s += d[i];
                 s -= d[i-t];
                 r.push(Math.round((s*this.decimalRoundingFactor)/t)/this.decimalRoundingFactor);
             }
