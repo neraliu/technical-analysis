@@ -7,8 +7,16 @@ Authors: Nera Liu <neraliu@yahoo-inc.com>
 */
 var debug = require("debug");
     progname = 'agent';
-
 debug.enable(progname);
 
+var redis = require("redis"),
+    client = redis.createClient();
+
 (function() {
+
+    client.on("error", function (err) {
+        console.log("[ERROR] " + err);
+        process.exit(-1);
+    });
+
 }).call(this);
