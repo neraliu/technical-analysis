@@ -37,7 +37,6 @@ Authors: Nera Liu <neraliu@yahoo-inc.com>
             ];
             t.forEach(function(obj) {
                 var r = ta.movingAverage(obj.d, obj.t);
-                console.log(r);
                 expect(r).to.deep.equal(obj.r);
             });
         });
