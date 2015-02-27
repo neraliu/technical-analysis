@@ -14,6 +14,29 @@ function TechnicalAnalysis() {
 }
 
 /**
+* @function module:technical-analysis#_expoentialMovingAverage
+*/
+TechnicalAnalysis.prototype._exponentialMovingAverage = function(d, t, i, m, pema, r) {
+    if (i >= t && i<d.length) {
+        pema = (d[i]-pema)*m + pema;
+        r.push(pema);
+    } else if (i>=0 && i<t) {
+        pema = isNaN(pema)? d[i] : pema + d[i];
+        if (i === t-1) {
+            pema = pema/t;
+            r.push(pema);
+        } else {
+            r.push(NaN);
+        }
+    }
+
+    if (i<d.length) {
+        return this._exponentialMovingAverage(d, t, i+1, m, pema, r);
+    }
+    return r;
+};
+
+/**
 * @function module:technical-analysis#expoentialMovingAverage
 *
 * @param {Array} d - the array of data.
@@ -23,25 +46,15 @@ function TechnicalAnalysis() {
 */
 TechnicalAnalysis.prototype.exponentialMovingAverage = function(d, t) {
     if (d.length >= t && d.constructor === Array) {
-        var r = [],
-            s = 0,
-            last = NaN,
-            multipler = Math.round((2/(t+1))*this.decimalInternalRoundingFactor)/this.decimalInternalRoundingFactor;
-
-        for(var i=0;i<d.length;++i) {
-            s += d[i];
-
-            if (i < t-1) {
-                r.push(NaN);
-            } else if (i+1 === t) {
-                last = Math.round((s*this.decimalRoundingFactor)/t)/this.decimalRoundingFactor;
-                r.push(last);
-            } else {
-                last = Math.round(((d[i]-last)*multipler+last)*this.decimalRoundingFactor)/this.decimalRoundingFactor;
-                r.push(last);
-            }
-        }
-        return r;
+        var m = (2/(t+1)),
+            r = this._exponentialMovingAverage(d, t, 0, m, NaN, []),
+            f = this.decimalRoundingFactor,
+            result = [];
+        
+        r.forEach(function(data) {
+            var s = isNaN(data) ? result.push(NaN) : result.push(Math.round(data*f)/f);
+        });
+        return result;
     } else {
         throw "[ERROR] TechnicalAnalysis#exponentialMovingAverage: Not enought data! OR data is not Array!";
     }
@@ -58,18 +71,19 @@ TechnicalAnalysis.prototype.exponentialMovingAverage = function(d, t) {
 TechnicalAnalysis.prototype.movingAverage = function(d, t) {
     if (d.length >= t && d.constructor === Array) {
         var r = [],
-            s = 0;
+            s = 0, f = this.decimalRoundingFactor, ma;
 
         for(var i=0;i<d.length;++i) {
             s += d[i];
-
             if (i < t-1) {
                 r.push(NaN);
             } else if (i+1 === t) {
-                r.push(Math.round((s*this.decimalRoundingFactor)/t)/this.decimalRoundingFactor);
+                ma = Math.round((s/t)*f)/f;
+                r.push(ma);
             } else {
                 s -= d[i-t];
-                r.push(Math.round((s*this.decimalRoundingFactor)/t)/this.decimalRoundingFactor);
+                ma = Math.round((s/t)*f)/f;
+                r.push(ma);
             }
         }
         return r;
