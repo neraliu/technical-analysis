@@ -33,21 +33,22 @@ TechnicalAnalysis.prototype._standardDeviation = function(d, m, t) {
 *
 * @param {Array} d - the array of data.
 * @param {int} t - the moving window of moving average.
-* @param {int} std - the standard deviation.
+* @param {float} stdUpper - the standard deviation of upper bands.
+* @param {float} stdLower - the standard deviation of lower bands.
 * @returns {Array} - the result.
 *
 */
-TechnicalAnalysis.prototype.bollingerBands = function(d, t, std) {
+TechnicalAnalysis.prototype.bollingerBands = function(d, t, stdUpper, stdLower) {
     if (d.length >= t && d.constructor === Array) {
         var r = {},
             stds = [], f = this.decimalRoundingFactor;
 
-        r.r1 = [];
-        r.r2 = this.movingAverage(d, t, false);
-        r.r3 = [];
+        r.upper = [];
+        r.middle = this.movingAverage(d, t, false);
+        r.lower = [];
 
         var ta = this;
-        r.r2.map(function(v, i) {
+        r.middle.map(function(v, i) {
             if (!isNaN(v)) {
                 var data = d.slice(i+1-t, i+1);
                 var std = ta._standardDeviation(data, v, t);
@@ -57,13 +58,13 @@ TechnicalAnalysis.prototype.bollingerBands = function(d, t, std) {
             }
         });
 
-        r.r2.map(function(v, i) {
+        r.middle.map(function(v, i) {
             // upper band
-            r.r1.push(Math.round((v+2*stds[i])*f)/f);
+            r.upper.push(Math.round((v+stdUpper*stds[i])*f)/f);
             // middle band
-            r.r2[i] = Math.round(r.r2[i]*f)/f;
+            r.middle[i] = Math.round(r.middle[i]*f)/f;
             // lower band
-            r.r3.push(Math.round((v-2*stds[i])*f)/f);
+            r.lower.push(Math.round((v-stdLower*stds[i])*f)/f);
         });
 
         return r;
