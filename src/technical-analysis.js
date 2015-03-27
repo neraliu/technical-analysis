@@ -121,6 +121,62 @@ TechnicalAnalysis.prototype.exponentialMovingAverage = function(d, t) {
 };
 
 /**
+* @function module:technical-analysis#max
+*
+* @param {Array} d - the array of data.
+* @param {int} t - the moving window of data.
+* @returns {Array} - the result.
+*
+*/
+TechnicalAnalysis.prototype.max = function(d, t) {
+    if (d.length >= t && d.constructor === Array) {
+        var r = [];
+
+        for(var i=0;i<d.length;++i) {
+            if (i < t-1) {
+                r.push(NaN);
+            } else {
+                var arr = d.slice(i+1-t, i+1);
+                var max = Math.max.apply(null, arr);
+                r.push(max);
+            }
+        }
+
+        return r;
+    } else {
+        throw "[ERROR] TechnicalAnalysis#max: Not enought data! OR data is not Array!";
+    }
+};
+
+/**
+* @function module:technical-analysis#min
+*
+* @param {Array} d - the array of data.
+* @param {int} t - the moving window of data.
+* @returns {Array} - the result.
+*
+*/
+TechnicalAnalysis.prototype.min = function(d, t) {
+    if (d.length >= t && d.constructor === Array) {
+        var r = [];
+
+        for(var i=0;i<d.length;++i) {
+            if (i < t-1) {
+                r.push(NaN);
+            } else {
+                var arr = d.slice(i+1-t, i+1);
+                var min = Math.min.apply(null, arr);
+                r.push(min);
+            }
+        }
+
+        return r;
+    } else {
+        throw "[ERROR] TechnicalAnalysis#min: Not enought data! OR data is not Array!";
+    }
+};
+
+/**
 * @function module:technical-analysis#movingAverage
 *
 * @param {Array} d - the array of data.
