@@ -1,6 +1,6 @@
 {
   "name": "technical-analysis",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "licenses": [
     {
       "type": "BSD",
@@ -9,15 +9,14 @@
   ],
   "author": "Nera Liu",
   "contributors": [
-    "Nera Liu <neraliu@yahoo-inc.com>"
+    "Nera Liu <neraliu@gmail.com>"
   ],
   "description": "Data Crawler",
   "repository": {
     "type": "git",
     "url": "git@github.com:neraliu/technical-analysis.git"
   },
-  "keywords": [
-  ],
+  "keywords": [],
   "scripts": {
     "hint": "grunt jshint",
     "build": "npm install; grunt",
@@ -25,7 +24,6 @@
     "test": "grunt test"
   },
   "dependencies": {
-    "debug": "*"
   },
   "devDependencies": {
     "chai": "^2.*",
