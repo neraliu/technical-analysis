@@ -11,7 +11,7 @@
   "contributors": [
     "Nera Liu <neraliu@gmail.com>"
   ],
-  "description": "Data Crawler",
+  "description": "JavaScript Implementation of Technical Analysis",
   "repository": {
     "type": "git",
     "url": "git@github.com:neraliu/technical-analysis.git"
