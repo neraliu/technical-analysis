@@ -53,8 +53,8 @@ var Promise = require('promise'),
     // conf
     var targets = [
         // conf
-        {symbol:'NASDAQ_FB',    size:90,type:'close'},
-        {symbol:'NASDAQ_YHOO',  size:90,type:'close'},
+        {symbol:'NASDAQ_FB',    size:360,type:'close'},
+        {symbol:'NASDAQ_YHOO',  size:360,type:'close'},
         ],
         d = new Date(),
         ts = d.getTime();
@@ -121,8 +121,8 @@ var Promise = require('promise'),
                 dataSample.forEach(function(d, i) {
                     o += "20"+dataDate[i]+"\t"
                     o += d+"\t";
-                    isNaN(r.r20[i]) === true ? o += "0\t" : o += r.r20[i]+"\t";
-                    isNaN(r.r50[i]) === true ? o += "0\n" : o += r.r50[i]+"\n";
+                    isNaN(r.r20[i]) === true ? o += d+"\t" : o += r.r20[i]+"\t";
+                    isNaN(r.r50[i]) === true ? o += d+"\n" : o += r.r50[i]+"\n";
                 });
                 fs.writeFileSync(filePrefix + "movingAverage.tsv", o, {flag:'w'});
                 return Promise.resolve(r);
