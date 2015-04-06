@@ -24,6 +24,8 @@
     "test": "grunt test"
   },
   "dependencies": {
+    "debug": "*",
+    "promise": "*"
   },
   "devDependencies": {
     "chai": "^2.*",
