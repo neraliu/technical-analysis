@@ -22,39 +22,13 @@ var Promise = require('promise'),
 
     // redis
     var redis = require("redis"),
-        client = redis.createClient(6379, '174.143.140.197', {auth_pass: 'iBwl3rz6MWIBN6z'}),
-        dataSample = [],
-        dataDate = [];
-
-    // promise
-    var seq = new Promise(function(resolve, reject) {
-        resolve(1);
-    });
-
-    // read data
-    var readDataPromise = function(key) {
-        return new Promise(function(resolve, reject) {
-            client.get(key, function(err, reply) {
-                if (reply !== null) {
-                    console.log("[AGENT] Reading key: "+key+",value:"+reply);
-                    dataSample.push(parseFloat(reply));
-                    dataDate.push(key.substring(0, 6));
-                }
-                resolve(reply);
-            });
-        });
-    };
-    var readData = function(key, seq) {
-        return seq.then(function() { 
-            return readDataPromise(key); 
-        });
-    };
+        client = redis.createClient(6379, '174.143.140.197', {auth_pass: 'iBwl3rz6MWIBN6z'});
 
     // conf
     var targets = [
         // conf
-        {symbol:'NASDAQ_FB',    size:360,type:'close'},
-        {symbol:'NASDAQ_YHOO',  size:360,type:'close'},
+        {symbol:'NASDAQ_FB',    size:90,type:'close'},
+        {symbol:'NASDAQ_YHOO',  size:90,type:'close'},
         ],
         d = new Date(),
         ts = d.getTime();
@@ -74,11 +48,41 @@ var Promise = require('promise'),
         console.log("[ERROR] " + err);
     });
     client.on("connect", function () {
-        console.log("[INFO] Redis connected!");
+        console.log("[AGENT] Redis connected!");
         targets.forEach(function(target, index) {
+
+            // data 
+            var dataSample = [],
+                dataDate = [];
+
+            // read data
+            var readDataPromise = function(key) {
+                return new Promise(function(resolve, reject) {
+                    client.get(key, function(err, reply) {
+                        if (reply !== null) {
+                            console.log("[AGENT] Reading key: "+key+",value:"+reply);
+                            dataSample.push(parseFloat(reply));
+                            dataDate.push(key.substring(0, 6));
+                        }
+                        resolve(reply);
+                    });
+                });
+            };
+            var readData = function(key, seq) {
+                return seq.then(function() { 
+                    return readDataPromise(key); 
+                });
+            };
+
+            var seq = new Promise(function(resolve, reject) {
+                dataSample = [];
+                dataDate = [];
+                resolve(1);
+            });
 
             // reading data
             var filePrefix = "./app/public/data/"+target.symbol+"/";
+            var fileTemplatePrefix = "./app/public/data/";
             for(var i=0;i<target.size;++i) {
                 var d = new Date(ts-ONE_DAY_MILLISECOND*i),
                 y = d.getFullYear().toString().replace(/^20/, ""),
@@ -89,104 +93,63 @@ var Promise = require('promise'),
                 seq = readData(key, seq);
             }
 
-            // create folder for analysis
+            // reading data completed
             seq.then(function() {
-                fs.existsSync(filePrefix) === true ? '' : fs.mkdirSync(filePrefix);
+                console.log("[AGENT] DataSample size: "+dataSample.length);
                 return Promise.resolve();
 
             // basic line chart
             }).then(function() {
-                console.log("[INFO] Reading data completed!"); 
-                console.log("[INFO] Data size: "+dataSample.length);
-                var o = "date\tclose\n";
-                dataSample = dataSample.reverse();
-                dataDate = dataDate.reverse();
-                dataSample.forEach(function(d, i) {
-                    o += "20"+dataDate[i]+"\t"+d+"\n";
-                });
-                fs.writeFileSync(filePrefix + "line.tsv", o, {flag:'w'});
+                fs.existsSync(filePrefix) === true ? '' : fs.mkdirSync(filePrefix);
+
+                // index.html
+                var o = "<html><body><h1>"+target.symbol+"</h1>";
+                o += "<ul>";
+                o += "<li><a href='line.html'>Basic Chart</a></li>";
+                o += "<li><a href='movingAverage.html'>Moving Average Chart</a></li>";
+                o += "<li><a href='exponentialMovingAverage.html'>Exponential Moving Average Chart</a></li>";
+                o += "</ul><a href='../index.html'>back</a></body></html>";
+                fs.writeFileSync(filePrefix+"index.html", o, {flag:'w'});
                 return Promise.resolve();
 
-            // moving average chart
+            // bollinger bands chart
             }).then(function() {
-                console.log("[INFO] Moving Average!");
-                var r20 = ta.movingAverage(dataSample, 20);
-                var r50 = ta.movingAverage(dataSample, 50);
-                var r = {};
-                var o = "date\tm0\tm20\tm50\n";
+                var r = ta.bollingerBands(dataSample, 20, 2, 2);
                 r.data = dataSample;
                 r.date = dataDate;
-                r.r20 = r20;
-                r.r50 = r50;
+                var o = "date\tb0\tlower\tupper\n";
                 dataSample.forEach(function(d, i) {
                     o += "20"+dataDate[i]+"\t"
                     o += d+"\t";
-                    isNaN(r.r20[i]) === true ? o += d+"\t" : o += r.r20[i]+"\t";
-                    isNaN(r.r50[i]) === true ? o += d+"\n" : o += r.r50[i]+"\n";
+                    isNaN(r.lower[i]) === true ? o += d+"\t" : o += r.lower[i]+"\t";
+                    isNaN(r.upper[i]) === true ? o += d+"\n" : o += r.upper[i]+"\n";
                 });
-                fs.writeFileSync(filePrefix + "movingAverage.tsv", o, {flag:'w'});
+                fs.writeFileSync(filePrefix+"exponentialMovingAverage.tsv", o, {flag:'w'});
+
+                // bollingerBands.html
+                fs.existsSync(filePrefix+"bollingerBands.html") !== true ? '' : o = fs.readFileSync(fileTemplatePrefix+"bollingerBands.tmpl").toString();
+                o += "<h1>"+target.symbol+"</h1>";
+                o += "<table>";
+                o += "</table>";
+                o += "<a href='./index.html'>back</a>";
+                o += "</body></html>";
+                fs.writeFileSync(filePrefix+"bollingerBands.html", o, {flag:'w'});
                 return Promise.resolve(r);
 
             // end
             }).then(function() {
-                console.log("[INFO] Cleaning the variables");
+                console.log("[AGENT] Completed!");
                 dataSample = [];
                 dataDate = [];
                 if (index+1 === targets.length) {
                     process.exit(0);
                 }
-                return Promise.resolve();
+                return Promise.resolve(0);
             });
         }); // targets.forEach
     });
 
 /*
-
-
-        seq.then(function() {
-            return Promise.resolve();
-        }).then(function(r) {
-            console.log("====================================================");
-            console.log("[INFO] Symbol: "+target.symbol);
-            console.log("[INFO] Start date range: "+dataDate[0]);
-            console.log("[INFO] End date range: "+dataDate[dataDate.length-1]);
-            dataSample.slice(dataSample.length-10, dataSample.length).forEach(formatString);
-            console.log("[INFO] Current Price:\t\t\t\t\t\t "+str);
-            function getMaxOfArray(numArray) {
-                return Math.max.apply(null, numArray);
-            }
-            console.log("[INFO] Max price:\t\t\t\t\t\t "+getMaxOfArray(dataSample));
-            function getMinOfArray(numArray) {
-                return Math.min.apply(null, numArray);
-            }
-            console.log("[INFO] Min price:\t\t\t\t\t\t "+getMinOfArray(dataSample));
-            return Promise.resolve();
-        }).then(function() {
-            console.log("====================================================");
-            var r20 = ta.exponentialMovingAverage(dataSample, 20);
-            var r50 = ta.exponentialMovingAverage(dataSample, 50);
-            var r = {};
-            r.data = dataSample;
-            r.date = dataDate;
-            r.r20 = r20;
-            r.r50 = r50;
-            r.r20.slice(r.r20.length-10, r.r20.length).forEach(formatString);
-            console.log("[INFO] Exponential Moving Average (20-day) price:\t\t "+str);
-            r.r50.slice(r.r50.length-10, r.r50.length).forEach(formatString);
-            console.log("[INFO] Exponential Moving Average (50-day) price:\t\t "+str);
-            return Promise.resolve(r);
-        }).then(function() {
-            console.log("====================================================");
-            var r = ta.bollingerBands(dataSample, 20, 2, 2);
-            r.upper.slice(r.upper.length-10, r.upper.length).forEach(formatString);
-            console.log("[INFO] Bollinger Bands Upper Band (20-day) price:\t\t "+str);
-            r.middle.slice(r.middle.length-10, r.middle.length).forEach(formatString);
-            console.log("[INFO] Bollinger Bands Middle Band (20-day) price:\t\t "+str);
-            r.lower.slice(r.lower.length-10, r.lower.length).forEach(formatString);
-            console.log("[INFO] Bollinger Bands Lower Band (20-day) price:\t\t "+str);
-            r.data = dataSample;
-            r.date = dataDate;
-            return Promise.resolve(r);
         }).then(function(bollingerBands) {
             console.log("====================================================");
             var accounts = [],

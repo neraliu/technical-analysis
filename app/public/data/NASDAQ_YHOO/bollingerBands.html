@@ -61,7 +61,7 @@ var svg = d3.select("body").append("svg")
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-d3.tsv("movingAverage.tsv", function(error, data) {
+d3.tsv("bollingerBands.tsv", function(error, data) {
   color.domain(d3.keys(data[0]).filter(function(key) { return key !== "date"; }));
 
   data.forEach(function(d) {
@@ -118,4 +118,4 @@ d3.tsv("movingAverage.tsv", function(error, data) {
 });
 
 </script>
-<h1>NASDAQ_FB</h1><table></table><a href='./index.html'>back</a></body></html>
+<h1>NASDAQ_YHOO</h1><table></table><a href='./index.html'>back</a></body></html>
