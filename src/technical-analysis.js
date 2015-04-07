@@ -3,7 +3,7 @@ Copyright (c) 2015, Nera Liu. All rights reserved.
 Copyrights licensed under the New BSD License.
 See the accompanying LICENSE file for terms.
 
-Authors: Nera Liu <neraliu@yahoo-inc.com>
+Authors: Nera Liu <neraliu@gmail.com>
 */
 (function() {
 "use strict";

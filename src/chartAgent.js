@@ -3,7 +3,7 @@ Copyright (c) 2015, All rights reserved.
 Copyrights licensed under the New BSD License.
 See the accompanying LICENSE file for terms.
 
-Authors: Nera Liu <neraliu@yahoo-inc.com>
+Authors: Nera Liu <neraliu@gmail.com>
 */
 /*jshint -W083 */
 /*
@@ -48,10 +48,21 @@ var Promise = require('promise'),
     }
 
     // main
+    var fileTemplatePrefix = "./app/public/data/";
     client.on("error", function (err) {
         console.log("[ERROR] " + err);
     });
     client.on("connect", function () {
+        targets.forEach(function(target, index) {
+            var o = "<html><body><h1>Stock Dashboard</h1>";
+            o += "<ul>";
+            o += "<li><a href='"+target.symbol+"/'>"+target.symbol+"</a></li>";
+            o += "</ul>";
+            o += "</body></html>";
+            var f = fs.openSync(fileTemplatePrefix+"index.html", 'w');
+            fs.writeSync(f, o);
+            fs.closeSync(f);
+        });
         console.log("[AGENT] Redis connected!");
         targets.forEach(function(target, index) {
 
@@ -86,7 +97,6 @@ var Promise = require('promise'),
 
             // reading data
             var filePrefix = "./app/public/data/"+target.symbol+"/";
-            var fileTemplatePrefix = "./app/public/data/";
             for(var i=0;i<target.size;++i) {
                 var d = new Date(ts-ONE_DAY_MILLISECOND*i),
                 y = d.getFullYear().toString().replace(/^20/, ""),
