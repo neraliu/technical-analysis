@@ -25,10 +25,14 @@ var Promise = require('promise'),
         client = redis.createClient(6379, '174.143.140.197', {auth_pass: 'iBwl3rz6MWIBN6z'});
 
     // conf
+    var _size = 360;
     var targets = [
         // conf
-        {symbol:'NASDAQ_FB',    size:90,type:'close'},
-        {symbol:'NASDAQ_YHOO',  size:90,type:'close'},
+        {symbol:'NASDAQ_AAPL',    size:_size,type:'close'},
+        {symbol:'NASDAQ_FB',      size:_size,type:'close'},
+        {symbol:'NASDAQ_GOOG',    size:_size,type:'close'},
+        {symbol:'NASDAQ_GOOGL',   size:_size,type:'close'},
+        {symbol:'NASDAQ_YHOO',    size:_size,type:'close'},
         ],
         d = new Date(),
         ts = d.getTime();
@@ -110,7 +114,9 @@ var Promise = require('promise'),
                 o += "<li><a href='exponentialMovingAverage.html'>Exponential Moving Average Chart</a></li>";
                 o += "<li><a href='bollingerBands.html'>Bollinger Bands Chart</a></li>";
                 o += "</ul><a href='../index.html'>back</a></body></html>";
-                fs.writeFileSync(filePrefix+"index.html", o, {flag:'w'});
+                var f = fs.openSync(filePrefix+"index.html", 'w');
+                fs.writeSync(f, o);
+                fs.closeSync(f);
                 return Promise.resolve();
 
             // basic line chart
@@ -122,7 +128,9 @@ var Promise = require('promise'),
                 dataSample.forEach(function(d, i) {
                     o += "20"+dataDate[i]+"\t"+d+"\n";
                 });
-                fs.writeFileSync(filePrefix + "line.tsv", o, {flag:'w'});
+                var f = fs.openSync(filePrefix+"line.tsv", 'w');
+                fs.writeSync(f, o);
+                fs.closeSync(f);
 
                 // line.html
                 fs.existsSync(filePrefix+"line.html") !== true ? '' : o = fs.readFileSync(fileTemplatePrefix+"line.tmpl").toString();
@@ -137,7 +145,9 @@ var Promise = require('promise'),
                 o += "</table>";
                 o += "<a href='./index.html'>back</a>";
                 o += "</body></html>";
-                fs.writeFileSync(filePrefix+"line.html", o, {flag:'w'});
+                var f = fs.openSync(filePrefix+"line.html", 'w');
+                fs.writeSync(f, o);
+                fs.closeSync(f);
                 return Promise.resolve();
 
             // moving average chart
@@ -157,7 +167,9 @@ var Promise = require('promise'),
                     isNaN(r.r20[i]) === true ? o += d+"\t" : o += r.r20[i]+"\t";
                     isNaN(r.r50[i]) === true ? o += d+"\n" : o += r.r50[i]+"\n";
                 });
-                fs.writeFileSync(filePrefix+"movingAverage.tsv", o, {flag:'w'});
+                var f = fs.openSync(filePrefix+"movingAverage.tsv", 'w');
+                fs.writeSync(f, o);
+                fs.closeSync(f);
 
                 // movingAverage.html
                 fs.existsSync(filePrefix+"movingAverage.html") !== true ? '' : o = fs.readFileSync(fileTemplatePrefix+"movingAverage.tmpl").toString();
@@ -166,7 +178,9 @@ var Promise = require('promise'),
                 o += "</table>";
                 o += "<a href='./index.html'>back</a>";
                 o += "</body></html>";
-                fs.writeFileSync(filePrefix+"movingAverage.html", o, {flag:'w'});
+                var f = fs.openSync(filePrefix+"movingAverage.html", 'w');
+                fs.writeSync(f, o);
+                fs.closeSync(f);
                 return Promise.resolve(r);
 
             // exponential moving average chart
@@ -186,7 +200,9 @@ var Promise = require('promise'),
                     isNaN(r.r20[i]) === true ? o += d+"\t" : o += r.r20[i]+"\t";
                     isNaN(r.r50[i]) === true ? o += d+"\n" : o += r.r50[i]+"\n";
                 });
-                fs.writeFileSync(filePrefix+"exponentialMovingAverage.tsv", o, {flag:'w'});
+                var f = fs.openSync(filePrefix+"exponentialMovingAverage.tsv", 'w');
+                fs.writeSync(f, o);
+                fs.closeSync(f);
 
                 // exponentialMovingAverage.html
                 fs.existsSync(filePrefix+"exponentialMovingAverage.html") !== true ? '' : o = fs.readFileSync(fileTemplatePrefix+"exponentialMovingAverage.tmpl").toString();
@@ -195,7 +211,9 @@ var Promise = require('promise'),
                 o += "</table>";
                 o += "<a href='./index.html'>back</a>";
                 o += "</body></html>";
-                fs.writeFileSync(filePrefix+"exponentialMovingAverage.html", o, {flag:'w'});
+                var f = fs.openSync(filePrefix+"exponentialMovingAverage.html", 'w');
+                fs.writeSync(f, o);
+                fs.closeSync(f);
                 return Promise.resolve(r);
 
             // bollinger bands chart
@@ -212,7 +230,9 @@ var Promise = require('promise'),
                     isNaN(r.middle[i]) === true ? o += d+"\t" : o += r.middle[i]+"\t";
                     isNaN(r.upper[i]) === true ? o += d+"\n" : o += r.upper[i]+"\n";
                 });
-                fs.writeFileSync(filePrefix+"bollingerBands.tsv", o, {flag:'w'});
+                var f = fs.openSync(filePrefix+"bollingerBands.tsv", 'w');
+                fs.writeSync(f, o);
+                fs.closeSync(f);
 
                 // bollingerBands.html
                 fs.existsSync(filePrefix+"bollingerBands.html") !== true ? '' : o = fs.readFileSync(fileTemplatePrefix+"bollingerBands.tmpl").toString();
@@ -221,7 +241,9 @@ var Promise = require('promise'),
                 o += "</table>";
                 o += "<a href='./index.html'>back</a>";
                 o += "</body></html>";
-                fs.writeFileSync(filePrefix+"bollingerBands.html", o, {flag:'w'});
+                var f = fs.openSync(filePrefix+"bollingerBands.html", 'w');
+                fs.writeSync(f, o);
+                fs.closeSync(f);
                 return Promise.resolve(r);
 
             // end
