@@ -53,16 +53,16 @@ var Promise = require('promise'),
         console.log("[ERROR] " + err);
     });
     client.on("connect", function () {
+        var o = "<html><body><h1>Stock Dashboard</h1>";
+        o += "<ul>";
         targets.forEach(function(target, index) {
-            var o = "<html><body><h1>Stock Dashboard</h1>";
-            o += "<ul>";
             o += "<li><a href='"+target.symbol+"/'>"+target.symbol+"</a></li>";
-            o += "</ul>";
-            o += "</body></html>";
-            var f = fs.openSync(fileTemplatePrefix+"index.html", 'w');
-            fs.writeSync(f, o);
-            fs.closeSync(f);
         });
+        o += "</ul>";
+        o += "</body></html>";
+        var f = fs.openSync(fileTemplatePrefix+"index.html", 'w');
+        fs.writeSync(f, o);
+        fs.closeSync(f);
         console.log("[AGENT] Redis connected!");
         targets.forEach(function(target, index) {
 
@@ -123,6 +123,7 @@ var Promise = require('promise'),
                 o += "<li><a href='movingAverage.html'>Moving Average Chart</a></li>";
                 o += "<li><a href='exponentialMovingAverage.html'>Exponential Moving Average Chart</a></li>";
                 o += "<li><a href='bollingerBands.html'>Bollinger Bands Chart</a></li>";
+                o += "<li><a href='backTestingBollingerBandsAgent.html'>Bollinger Bands Back Testing</a></li>";
                 o += "</ul><a href='../index.html'>back</a></body></html>";
                 var f = fs.openSync(filePrefix+"index.html", 'w');
                 fs.writeSync(f, o);
