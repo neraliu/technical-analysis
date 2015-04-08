@@ -28,20 +28,35 @@ var Promise = require('promise'),
     var _size = 360;
     var targets = [
         // conf
-        {symbol:'NASDAQ_AAPL',    size:_size,type:'close', 
-            tests: {std: [2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0] },
+        {symbol:'NASDAQ_AAPL', size:_size,type:'close', 
+            tests: {
+                std: [2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0, 2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0, 2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0],
+                ma:  [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20 , 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,  25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25 ],
+            },
         },
-        {symbol:'NASDAQ_FB',      size:_size,type:'close', 
-            tests: {std: [2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0] },
+        {symbol:'NASDAQ_FB', size:_size,type:'close', 
+            tests: {
+                std: [2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0, 2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0, 2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0],
+                ma:  [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20 , 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,  25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25 ],
+            },
         },
-        {symbol:'NASDAQ_GOOG',    size:_size,type:'close', 
-            tests: {std: [2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0] },
+        {symbol:'NASDAQ_GOOG', size:_size,type:'close', 
+            tests: {
+                std: [2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0, 2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0, 2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0],
+                ma:  [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20 , 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,  25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25 ],
+            },
         },
-        {symbol:'NASDAQ_GOOGL',   size:_size,type:'close', 
-            tests: {std: [2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0] },
+        {symbol:'NASDAQ_GOOGL', size:_size,type:'close', 
+            tests: {
+                std: [2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0, 2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0, 2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0],
+                ma:  [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20 , 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,  25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25 ],
+            },
         },
-        {symbol:'NASDAQ_YHOO',    size:_size,type:'close', 
-            tests: {std: [2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0] },
+        {symbol:'NASDAQ_YHOO', size:_size,type:'close', 
+            tests: {
+                std: [2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0, 2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0, 2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0],
+                ma:  [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20 , 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,  25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25 ],
+            },
         },
         ],
         d = new Date(),
@@ -51,12 +66,6 @@ var Promise = require('promise'),
     var TechnicalAnalysis = require("./technical-analysis.js").TechnicalAnalysis,
         ta = new TechnicalAnalysis();
 
-    var str;
-    function formatString(e, i, arr) {
-        if (i === 0) str = '';
-        str += e.toFixed(2) + " ";
-    }
-
     // main
     client.on("error", function (err) {
         console.log("[ERROR] " + err);
@@ -64,6 +73,8 @@ var Promise = require('promise'),
     client.on("connect", function () {
         console.log("[AGENT] Redis connected!");
         targets.forEach(function(target, index) {
+
+            (function() {
 
             // data 
             var dataSample = [],
@@ -115,98 +126,108 @@ var Promise = require('promise'),
 
             // bollinger bands chart
             }).then(function() {
-                var results = [],
-                    ma = 20;
+                var results = [];
 
                 target.tests.std.forEach(function(std, j) {
-                console.log("====================================================");
-                console.log("[INFO] BollingerBands std:"+std);
+                    console.log("====================================================");
+                    console.log("[INFO] BollingerBands std:"+std);
 
-                var bollingerBands = ta.bollingerBands(dataSample, ma, std, std);
-                bollingerBands.date = dataDate;
-                var accounts = [],
-                    size = 100,
-                    maxAmount = 0, amount = 0;
+                    var bollingerBands = ta.bollingerBands(dataSample, target.tests.ma[j], std, std);
+                    bollingerBands.date = dataDate;
 
-                dataSample.forEach(function(d, i) {
-                    if (!isNaN(bollingerBands.lower[i]) && bollingerBands.lower[i] >= d) {
-                        // console.log("[INFO] Buy Signal @ "+d+"/"+bollingerBands.lower[i]+", date:"+bollingerBands.date[i]);
-                        var tran = {};
-                        tran.buyPrice = d;
-                        tran.bollingerBandsR3 = bollingerBands.lower[i];
-                        tran.status = 'open';
-                        tran.cost = 9.99;
-                        tran.size = size;
-                        tran.marketValueBuyPrice = tran.buyPrice * tran.size;
+                    var accounts = [],
+                        size = 100,
+                        maxAmount = 0, amount = 0;
 
-                        amount += tran.marketValueBuyPrice;
-                        accounts.push(tran);
-                    } else if (!isNaN(bollingerBands.upper[i]) && bollingerBands.upper[i] <= d) {
-                        accounts.forEach(function(t) {
-                            if (t.status === 'open') {
-                                // console.log("[INFO] Sell Signal @ "+d+"/"+bollingerBands.upper[i]+", date:"+bollingerBands.date[i]);
-                                // console.log("[INFO] Executing Sell Signal @ "+d+"/"+bollingerBands.upper[i]+", date:"+bollingerBands.date[i]);
-                                t.sellPrice = d;
-                                t.cost += 9.99;
-                                t.status = 'closed';
-                                t.marketValueSellPrice = t.sellPrice * t.size;
-                                t.profitOrLoss = (t.sellPrice-t.buyPrice)*t.size - t.cost;
-                                if (amount > maxAmount) {
-                                    maxAmount = amount;
+                    dataSample.forEach(function(d, i) {
+                        if (!isNaN(bollingerBands.lower[i]) && bollingerBands.lower[i] >= d) {
+                            console.log("[INFO] Buy Signal @ "+d+"/"+bollingerBands.lower[i]+", date:"+bollingerBands.date[i]);
+                            var tran = {};
+                            tran.buyPrice = d;
+                            tran.bollingerBandsLower = bollingerBands.lower[i];
+                            tran.status = 'open';
+                            tran.cost = 9.99;
+                            tran.size = size;
+                            tran.marketValueBuyPrice = tran.buyPrice * tran.size;
+
+                            amount += tran.marketValueBuyPrice;
+                            accounts.push(tran);
+                        } else if (!isNaN(bollingerBands.upper[i]) && bollingerBands.upper[i] <= d) {
+                            accounts.forEach(function(t) {
+                                if (t.status === 'open') {
+                                    console.log("[INFO] Sell Signal @ "+d+"/"+bollingerBands.upper[i]+", date:"+bollingerBands.date[i]);
+                                    console.log("[INFO] Executing Sell Signal @ "+d+"/"+bollingerBands.upper[i]+", date:"+bollingerBands.date[i]);
+                                    t.sellPrice = d;
+                                    t.cost += 9.99;
+                                    t.status = 'closed';
+                                    t.marketValueSellPrice = t.sellPrice * t.size;
+                                    t.profitOrLoss = (t.sellPrice-t.buyPrice)*t.size - t.cost;
+                                    if (amount > maxAmount) {
+                                        maxAmount = amount;
+                                    }
+                                    amount = 0;
                                 }
-                                amount = 0;
-                            }
-                        });
-                    }
-                });
-                var tran = {};
-                tran.status = 'final';
-                tran.cost = maxAmount;
-                accounts.push(tran);
+                            });
+                        }
+                   });
 
-                var profit = 0,
-                    maxAmount = 0;
-                accounts.forEach(function(t) {
-                    if (t.status !== 'final') {
-                        profit += t.profitOrLoss;
-                    } else {
-                        maxAmount = t.cost;
-                    }
-                });
+                    var profit = 0,
+                        marketValue = 0;
+                    accounts.forEach(function(t) {
+                        if (t.status === 'closed') {
+                            profit += t.profitOrLoss;
+                        } else if (t.status === 'open') {
+                            marketValue += t.size*dataSample[dataSample.length-1];
+                        }
+                    });
 
-                var res = {};
-                res.t = ma;
-                res.std = std;
-                res.profit = profit;
-                res.maxAmount = maxAmount;
-                res.return = (profit/maxAmount);
-                results.push(res);
-                console.log("[INFO] Profit/Loss: "+profit);
-                console.log("[INFO] Cost: "+maxAmount);
-                console.log("[INFO] Return: "+(profit/maxAmount));
+                    var res = {};
+                    res.ma = target.tests.ma[j];
+                    res.std = std;
+                    res.profit = profit;
+                    res.maxAmount = maxAmount;
+                    res.return = (profit/maxAmount);
+                    results.push(res);
+
+                    console.log("[INFO] Profit/Loss: "+profit);
+                    console.log("[INFO] Cost: "+maxAmount);
+                    console.log("[INFO] Return: "+(profit/maxAmount));
+                    console.log("[INFO] Market Value: "+marketValue);
                 }); // targets.tests.forEach(function(std, j) {
 
                 return Promise.resolve(results);
             // end
             }).then(function(results) {
                 console.log("[AGENT] Completed!");
-                dataSample = [];
-                dataDate = [];
                 var f = fs.openSync(filePrefix+"backTestingBollingerBandsAgent.html", 'w');
                 var o = '<table border="1">';
-                o += '<tr><td>ma</td><td>std</td><td>profit</td><td>maxAmount</td><td>return</td></tr>';
+                o += '<tr><td>ma</td><td>std</td><td>profit</td><td>maxAmount</td><td>return</td><td>return/cost</td></tr>';
                 results.forEach(function(res, i) {
-                    o += "<tr><td>"+res.ma+"</td><td>"+res.std+"</td><td>"+res.profit+"</td><td>"+res.maxAmount+"</td><td>"+res.return+"</td></tr>";
+                    o += "<tr><td>"+res.ma+"</td><td>"+res.std+"</td><td>"+res.profit+"</td><td>"+res.maxAmount+"</td><td>"+res.return+"</td>";
+                    o += "<td>"+res.return/res.maxAmount+"</td></tr>";
                 });
                 o += '</table>';
-                o += "<a href='index.html'>back</a>";
+                o += "<br/><a href='index.html'>back</a>";
                 fs.writeSync(f, o);
                 fs.closeSync(f);
+
+                var f = fs.openSync(filePrefix+"backTestingBollingerBandsAgent.tsv", 'w');
+                o = "";
+                results.forEach(function(res, i) {
+                    o += res.ma+","+res.std+","+res.profit+","+res.maxAmount+","+res.return+",";
+                    o += (res.return/res.maxAmount);
+                });
+                fs.writeSync(f, o);
+                fs.closeSync(f);
+
                 if (index+1 === targets.length) {
                     process.exit(0);
                 }
                 return Promise.resolve(0);
             });
+
+            })();
+
         }); // targets.forEach
     });
 

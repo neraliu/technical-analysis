@@ -27,7 +27,7 @@ var Promise = require('promise'),
     // conf
     var _size = 360;
     var targets = [
-        // conf
+        // conf (move to configuration)
         {symbol:'NASDAQ_AAPL',    size:_size,type:'close'},
         {symbol:'NASDAQ_FB',      size:_size,type:'close'},
         {symbol:'NASDAQ_GOOG',    size:_size,type:'close'},
@@ -40,12 +40,6 @@ var Promise = require('promise'),
     // technical analysis
     var TechnicalAnalysis = require("./technical-analysis.js").TechnicalAnalysis,
         ta = new TechnicalAnalysis();
-
-    var str;
-    function formatString(e, i, arr) {
-        if (i === 0) str = '';
-        str += e.toFixed(2) + " ";
-    }
 
     // main
     var fileTemplatePrefix = "./app/public/data/";
@@ -63,8 +57,11 @@ var Promise = require('promise'),
         var f = fs.openSync(fileTemplatePrefix+"index.html", 'w');
         fs.writeSync(f, o);
         fs.closeSync(f);
+
         console.log("[AGENT] Redis connected!");
         targets.forEach(function(target, index) {
+
+            (function() {
 
             // data 
             var dataSample = [],
@@ -124,6 +121,7 @@ var Promise = require('promise'),
                 o += "<li><a href='exponentialMovingAverage.html'>Exponential Moving Average Chart</a></li>";
                 o += "<li><a href='bollingerBands.html'>Bollinger Bands Chart</a></li>";
                 o += "<li><a href='backTestingBollingerBandsAgent.html'>Bollinger Bands Back Testing</a></li>";
+                o += "<li><a href='backTestingBollingerBandsAgent.tsv'>Bollinger Bands Back Testing (Data)</a></li>";
                 o += "</ul><a href='../index.html'>back</a></body></html>";
                 var f = fs.openSync(filePrefix+"index.html", 'w');
                 fs.writeSync(f, o);
@@ -156,7 +154,7 @@ var Promise = require('promise'),
                 o += "</table>";
                 o += "<a href='./index.html'>back</a>";
                 o += "</body></html>";
-                var f = fs.openSync(filePrefix+"line.html", 'w');
+                f = fs.openSync(filePrefix+"line.html", 'w');
                 fs.writeSync(f, o);
                 fs.closeSync(f);
                 return Promise.resolve();
@@ -222,7 +220,7 @@ var Promise = require('promise'),
                 o += "</table>";
                 o += "<a href='./index.html'>back</a>";
                 o += "</body></html>";
-                var f = fs.openSync(filePrefix+"exponentialMovingAverage.html", 'w');
+                f = fs.openSync(filePrefix+"exponentialMovingAverage.html", 'w');
                 fs.writeSync(f, o);
                 fs.closeSync(f);
                 return Promise.resolve(r);
@@ -267,6 +265,8 @@ var Promise = require('promise'),
                 }
                 return Promise.resolve(0);
             });
+
+            })();
         }); // targets.forEach
     });
 }).call(this);
