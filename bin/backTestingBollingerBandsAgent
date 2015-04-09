@@ -17,7 +17,7 @@ var Promise = require('promise'),
 
     // redis
     var redis = require("redis"),
-        client = redis.createClient(6379, '174.143.140.197', {auth_pass: 'iBwl3rz6MWIBN6z'});
+        client = redis.createClient(6379, '174.143.140.197', {auth_pass: 'iBwl3rz6MWIBN6z'}); // TODO: revoke the password and move to secure storage 
 
     // conf
     var _size = 360;
