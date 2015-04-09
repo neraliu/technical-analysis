@@ -58,7 +58,7 @@ var Promise = require('promise'),
         ts = d.getTime();
 
     // technical analysis
-    var TechnicalAnalysis = require("./technical-analysis.js").TechnicalAnalysis,
+    var TechnicalAnalysis = require("../src/technical-analysis.js").TechnicalAnalysis,
         ta = new TechnicalAnalysis();
 
     // main
