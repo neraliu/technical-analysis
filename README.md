@@ -32,6 +32,18 @@ var r = ta.movingAverage(d, 5);
 * min(data, interval)
 * movingAverage(data, interval)
 
-## Contributions
+## Development & Contributions
 
-you are welcome to contribute to this library.
+### How to test
+```sh
+npm test
+```
+
+And you are welcome to contribute to this library.
+
+### Build
+
+## License
+
+This software is free to use under the BSD license.
+See the [LICENSE file](./LICENSE) for license text and copyright information.
