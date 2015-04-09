@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /*
 Copyright (c) 2015, All rights reserved.
 Copyrights licensed under the New BSD License.
@@ -6,12 +7,6 @@ See the accompanying LICENSE file for terms.
 Authors: Nera Liu <neraliu@gmail.com>
 */
 /*jshint -W083 */
-/*
-var debug = require("debug");
-    progname = 'agent';
-debug.enable(progname);
-*/
-
 /* promise */
 var Promise = require('promise'),
     fs = require('fs');
@@ -38,7 +33,7 @@ var Promise = require('promise'),
         ts = d.getTime();
 
     // technical analysis
-    var TechnicalAnalysis = require("./technical-analysis.js").TechnicalAnalysis,
+    var TechnicalAnalysis = require("../src/technical-analysis.js").TechnicalAnalysis,
         ta = new TechnicalAnalysis();
 
     // main
