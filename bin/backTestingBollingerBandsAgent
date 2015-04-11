@@ -9,6 +9,7 @@ Authors: Nera Liu <neraliu@gmail.com>
 /*jshint -W083 */
 /* promise */
 var Promise = require('promise'),
+    utils = require('../src/utils'),
     fs = require('fs');
 
 (function() {
@@ -17,43 +18,10 @@ var Promise = require('promise'),
 
     // redis
     var redis = require("redis"),
-        client = redis.createClient(6379, '174.143.140.197', {auth_pass: 'iBwl3rz6MWIBN6z'}); // TODO: revoke the password and move to secure storage 
+        conf = utils.readConf("./conf/technical-analysis.conf");
+        client = redis.createClient(conf.redisPort, conf.redisHost, {auth_pass: conf.redisPassword});
 
-    // conf
-    var _size = 360;
-    var targets = [
-        // conf (move to configuration)
-        {symbol:'NASDAQ_AAPL', size:_size,type:'close', 
-            tests: {
-                std: [2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0, 2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0, 2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0],
-                ma:  [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20 , 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,  25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25 ],
-            },
-        },
-        {symbol:'NASDAQ_FB', size:_size,type:'close', 
-            tests: {
-                std: [2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0, 2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0, 2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0],
-                ma:  [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20 , 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,  25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25 ],
-            },
-        },
-        {symbol:'NASDAQ_GOOG', size:_size,type:'close', 
-            tests: {
-                std: [2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0, 2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0, 2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0],
-                ma:  [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20 , 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,  25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25 ],
-            },
-        },
-        {symbol:'NASDAQ_GOOGL', size:_size,type:'close', 
-            tests: {
-                std: [2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0, 2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0, 2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0],
-                ma:  [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20 , 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,  25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25 ],
-            },
-        },
-        {symbol:'NASDAQ_YHOO', size:_size,type:'close', 
-            tests: {
-                std: [2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0, 2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0, 2.0,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.2,1.1,1.0],
-                ma:  [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20 , 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,  25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25 ],
-            },
-        },
-        ],
+    var targets = conf.stocks,
         d = new Date(),
         ts = d.getTime();
 
@@ -194,7 +162,6 @@ var Promise = require('promise'),
             // end
             }).then(function(results) {
                 console.log("[AGENT] Completed!");
-                var f = fs.openSync(filePrefix+"backTestingBollingerBandsAgent.html", 'w');
                 var o = '<table border="1">';
                 o += '<tr><td>ma</td><td>std</td><td>profit</td><td>maxAmount</td><td>return</td><td>return/cost</td></tr>';
                 results.forEach(function(res, i) {
@@ -203,17 +170,14 @@ var Promise = require('promise'),
                 });
                 o += '</table>';
                 o += "<br/><a href='index.html'>back</a>";
-                fs.writeSync(f, o);
-                fs.closeSync(f);
+                utils.writeFile(filePrefix+"backTestingBollingerBandsAgent.html", o);
 
-                var f = fs.openSync(filePrefix+"backTestingBollingerBandsAgent.tsv", 'w');
                 o = "";
                 results.forEach(function(res, i) {
                     o += res.ma+","+res.std+","+res.profit+","+res.maxAmount+","+res.return+",";
                     o += (res.return/res.maxAmount);
                 });
-                fs.writeSync(f, o);
-                fs.closeSync(f);
+                utils.writeFile(filePrefix+"backTestingBollingerBandsAgent.tsv", o);
 
                 if (index+1 === targets.length) {
                     process.exit(0);

@@ -1,5 +1,6 @@
 node_modules
 coverage
 *.log
+conf
 app/public/data/NASDAQ_*
 app/public/data/index.html
