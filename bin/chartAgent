@@ -30,7 +30,7 @@ var Promise = require('promise'),
         ta = new TechnicalAnalysis();
 
     // main
-    var fileTemplatePrefix = "./app/public/data/";
+    var fileTemplatePrefix = conf.templateFilePath;
     client.on("error", function (err) {
         console.log("[ERROR] " + err);
     });
@@ -79,7 +79,7 @@ var Promise = require('promise'),
             });
 
             // reading data
-            var filePrefix = "./app/public/data/"+target.symbol+"/";
+            var filePrefix = fileTemplatePrefix+target.symbol+"/";
             for(var i=0;i<target.size;++i) {
                 var d = new Date(ts-ONE_DAY_MILLISECOND*i),
                 y = d.getFullYear().toString().replace(/^20/, ""),
@@ -95,7 +95,6 @@ var Promise = require('promise'),
                 console.log("[AGENT] DataSample size: "+dataSample.length);
                 return Promise.resolve();
 
-            // basic line chart
             }).then(function() {
                 fs.existsSync(filePrefix) === true ? '' : fs.mkdirSync(filePrefix);
 

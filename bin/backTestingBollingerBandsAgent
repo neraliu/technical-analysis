@@ -22,6 +22,7 @@ var Promise = require('promise'),
         client = redis.createClient(conf.redisPort, conf.redisHost, {auth_pass: conf.redisPassword});
 
     var targets = conf.stocks,
+        tests = conf.bollingerBands.tests,
         d = new Date(),
         ts = d.getTime();
 
@@ -91,17 +92,24 @@ var Promise = require('promise'),
             }).then(function() {
                 var results = [];
 
-                target.tests.std.forEach(function(std, j) {
+                // TODO: split it into different node to calculate
+                for(var ma=tests.sMA;ma<=tests.eMA;ma+=tests.deltaMA) {
+                for(var std=tests.sStd;std<=tests.eStd;std+=tests.deltaStd) {
+                    std = Math.round(std*100)/100;
+
                     console.log("====================================================");
                     console.log("[INFO] BollingerBands std:"+std);
+                    console.log("[INFO] BollingerBands ma:"+ma);
 
-                    var bollingerBands = ta.bollingerBands(dataSample, target.tests.ma[j], std, std);
+                    var bollingerBands = ta.bollingerBands(dataSample, ma, std, std);
                     bollingerBands.date = dataDate;
 
                     var accounts = [],
                         size = 100,
                         maxAmount = 0, amount = 0;
 
+                    // back testing trading algo
+                    /* buy it when it is below the bollingerBands and sell it when it is above the bollingerBands */
                     dataSample.forEach(function(d, i) {
                         if (!isNaN(bollingerBands.lower[i]) && bollingerBands.lower[i] >= d) {
                             console.log("[INFO] Buy Signal @ "+d+"/"+bollingerBands.lower[i]+", date:"+bollingerBands.date[i]);
@@ -145,7 +153,7 @@ var Promise = require('promise'),
                     });
 
                     var res = {};
-                    res.ma = target.tests.ma[j];
+                    res.ma = ma;
                     res.std = std;
                     res.profit = profit;
                     res.maxAmount = maxAmount;
@@ -155,18 +163,22 @@ var Promise = require('promise'),
                     console.log("[INFO] Profit/Loss: "+profit);
                     console.log("[INFO] Cost: "+maxAmount);
                     console.log("[INFO] Return: "+(profit/maxAmount));
-                    console.log("[INFO] Market Value: "+marketValue);
-                }); // targets.tests.forEach(function(std, j) {
+                    console.log("[INFO] Outstanding Market Value: "+marketValue);
+                }
+                }
 
                 return Promise.resolve(results);
             // end
             }).then(function(results) {
                 console.log("[AGENT] Completed!");
+
+                var maxReturn = [];
                 var o = '<table border="1">';
                 o += '<tr><td>ma</td><td>std</td><td>profit</td><td>maxAmount</td><td>return</td><td>return/cost</td></tr>';
                 results.forEach(function(res, i) {
                     o += "<tr><td>"+res.ma+"</td><td>"+res.std+"</td><td>"+res.profit+"</td><td>"+res.maxAmount+"</td><td>"+res.return+"</td>";
                     o += "<td>"+res.return/res.maxAmount+"</td></tr>";
+                    maxReturn.push(res.return);
                 });
                 o += '</table>';
                 o += "<br/><a href='index.html'>back</a>";
@@ -176,6 +188,7 @@ var Promise = require('promise'),
                 results.forEach(function(res, i) {
                     o += res.ma+","+res.std+","+res.profit+","+res.maxAmount+","+res.return+",";
                     o += (res.return/res.maxAmount);
+                    o += "\n";
                 });
                 utils.writeFile(filePrefix+"backTestingBollingerBandsAgent.tsv", o);
 
