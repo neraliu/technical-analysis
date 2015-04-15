@@ -14,8 +14,6 @@ var Promise = require('promise'),
 
 (function() {
 
-    var ONE_DAY_MILLISECOND = 86400000;
-
     // redis
     var redis = require("redis"),
         conf = utils.readConf("./conf/technical-analysis.conf");
@@ -81,7 +79,7 @@ var Promise = require('promise'),
             // reading data
             var filePrefix = fileTemplatePrefix+target.symbol+"/";
             for(var i=0;i<target.size;++i) {
-                var d = new Date(ts-ONE_DAY_MILLISECOND*i),
+                var d = new Date(ts-conf.ONE_DAY_MILLISECOND*i),
                 y = d.getFullYear().toString().replace(/^20/, ""),
                 m = d.getMonth()+1 < 10? "0"+(d.getMonth()+1) : d.getMonth()+1,
                 da = d.getDate() < 10? "0"+d.getDate() : d.getDate(),

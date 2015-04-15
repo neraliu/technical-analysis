@@ -14,8 +14,6 @@ var Promise = require('promise'),
 
 (function() {
 
-    var ONE_DAY_MILLISECOND = 86400000;
-
     // redis
     var redis = require("redis"),
         conf = utils.readConf("./conf/technical-analysis.conf");
@@ -72,7 +70,7 @@ var Promise = require('promise'),
             // reading data
             var filePrefix = "./app/public/data/"+target.symbol+"/";
             for(var i=0;i<target.size;++i) {
-                var d = new Date(ts-ONE_DAY_MILLISECOND*i),
+                var d = new Date(ts-conf.ONE_DAY_MILLISECOND*i),
                 y = d.getFullYear().toString().replace(/^20/, ""),
                 m = d.getMonth()+1 < 10? "0"+(d.getMonth()+1) : d.getMonth()+1,
                 da = d.getDate() < 10? "0"+d.getDate() : d.getDate(),
@@ -88,7 +86,7 @@ var Promise = require('promise'),
                 dataDate = dataDate.reverse();
                 return Promise.resolve();
 
-            // bollinger bands chart
+            // bollinger bands trading algo
             }).then(function() {
                 var results = [];
 
@@ -98,97 +96,75 @@ var Promise = require('promise'),
                     std = Math.round(std*100)/100;
 
                     console.log("====================================================");
-                    console.log("[INFO] BollingerBands std:"+std);
-                    console.log("[INFO] BollingerBands ma:"+ma);
+                    console.log("[AGENT] BollingerBands std:"+std);
+                    console.log("[AGENT] BollingerBands ma:"+ma);
 
                     var bollingerBands = ta.bollingerBands(dataSample, ma, std, std);
                     bollingerBands.date = dataDate;
 
-                    var accounts = [],
+                    var trans = [],
                         size = 100,
-                        maxAmount = 0, amount = 0;
+                        amount = 0;
 
-                    // back testing trading algo
-                    /* buy it when it is below the bollingerBands and sell it when it is above the bollingerBands */
+                    // back testing bollingBands trading algo 1
+                    /* buy it when it is below the bollingerBands and sell it when it is above the bollingerBands with one transaction only */
                     dataSample.forEach(function(d, i) {
-                        if (!isNaN(bollingerBands.lower[i]) && bollingerBands.lower[i] >= d) {
-                            console.log("[INFO] Buy Signal @ "+d+"/"+bollingerBands.lower[i]+", date:"+bollingerBands.date[i]);
-                            var tran = {};
-                            tran.buyPrice = d;
-                            tran.bollingerBandsLower = bollingerBands.lower[i];
-                            tran.status = 'open';
-                            tran.cost = 9.99;
-                            tran.size = size;
-                            tran.marketValueBuyPrice = tran.buyPrice * tran.size;
+                        if (trans.length === 0 && 
+                            !isNaN(bollingerBands.lower[i]) && bollingerBands.lower[i] >= d) {
 
-                            amount += tran.marketValueBuyPrice;
-                            accounts.push(tran);
+                            console.log("[AGENT] Buy Signal @ "+d+"/"+bollingerBands.lower[i]+", date:"+bollingerBands.date[i]);
+                            var tran = utils.saveBuyTransaction(target.symbol, d, tests.size, 
+                                {"bollingerBandsLower":bollingerBands.lower[i], "ma":ma, "std":std});
+                            trans.push(tran);
+
                         } else if (!isNaN(bollingerBands.upper[i]) && bollingerBands.upper[i] <= d) {
-                            accounts.forEach(function(t) {
+                            trans.forEach(function(t) {
                                 if (t.status === 'open') {
-                                    console.log("[INFO] Sell Signal @ "+d+"/"+bollingerBands.upper[i]+", date:"+bollingerBands.date[i]);
-                                    console.log("[INFO] Executing Sell Signal @ "+d+"/"+bollingerBands.upper[i]+", date:"+bollingerBands.date[i]);
-                                    t.sellPrice = d;
-                                    t.cost += 9.99;
-                                    t.status = 'closed';
-                                    t.marketValueSellPrice = t.sellPrice * t.size;
-                                    t.profitOrLoss = (t.sellPrice-t.buyPrice)*t.size - t.cost;
-                                    if (amount > maxAmount) {
-                                        maxAmount = amount;
-                                    }
-                                    amount = 0;
+                                    console.log("[AGENT] Sell Signal @ "+d+"/"+bollingerBands.upper[i]+", date:"+bollingerBands.date[i]);
+                                    console.log("[AGENT] Executing Sell Signal @ "+d+"/"+bollingerBands.upper[i]+", date:"+bollingerBands.date[i]);
+                                    utils.saveSellTransaction(t, d, tests.size, {"bollingerBandsUpper":bollingerBands.upper[i]});
                                 }
                             });
                         }
-                   });
-
-                    var profit = 0,
-                        marketValue = 0;
-                    accounts.forEach(function(t) {
-                        if (t.status === 'closed') {
-                            profit += t.profitOrLoss;
-                        } else if (t.status === 'open') {
-                            marketValue += t.size*dataSample[dataSample.length-1];
-                        }
                     });
-
-                    var res = {};
-                    res.ma = ma;
-                    res.std = std;
-                    res.profit = profit;
-                    res.maxAmount = maxAmount;
-                    res.return = (profit/maxAmount);
-                    results.push(res);
-
-                    console.log("[INFO] Profit/Loss: "+profit);
-                    console.log("[INFO] Cost: "+maxAmount);
-                    console.log("[INFO] Return: "+(profit/maxAmount));
-                    console.log("[INFO] Outstanding Market Value: "+marketValue);
+                    results.push(trans);
                 }
                 }
-
                 return Promise.resolve(results);
-            // end
+            // bollinger bands trading results
             }).then(function(results) {
                 console.log("[AGENT] Completed!");
 
-                var maxReturn = [];
-                var o = '<table border="1">';
-                o += '<tr><td>ma</td><td>std</td><td>profit</td><td>maxAmount</td><td>return</td><td>return/cost</td></tr>';
-                results.forEach(function(res, i) {
-                    o += "<tr><td>"+res.ma+"</td><td>"+res.std+"</td><td>"+res.profit+"</td><td>"+res.maxAmount+"</td><td>"+res.return+"</td>";
-                    o += "<td>"+res.return/res.maxAmount+"</td></tr>";
-                    maxReturn.push(res.return);
+                var maxReturnTransaction;
+
+                var o = '<h1>Transaction</h1>';
+                o += '<table border="1">';
+                o += '<tr><td>ma</td><td>std</td><td>profit</td><td>return</td></tr>';
+                results.forEach(function(trans, i) {
+                    trans.forEach(function(t, i) {
+                        o += "<tr><td>"+t.extra.ma+"</td><td>"+t.extra.std+"</td><td>"+t.profitOrLoss+"</td><td>"+t.return+"</td>";
+                        o += "</tr>";
+                        maxReturnTransaction === undefined? maxReturnTransaction = t : '';
+                        t.return > maxReturnTransaction.return ? maxReturnTransaction = t : '';
+                    });
                 });
                 o += '</table>';
+
+                o += '<h1>Max Return Transaction</h1>';
+                o += '<table border="1">';
+                o += "<tr><td>"+maxReturnTransaction.extra.ma+"</td><td>"+maxReturnTransaction.extra.std+"</td>";
+                o += "<td>"+maxReturnTransaction.profitOrLoss+"</td><td>"+maxReturnTransaction.return+"</td></tr>";
+                o += '</table>';
+
                 o += "<br/><a href='index.html'>back</a>";
                 utils.writeFile(filePrefix+"backTestingBollingerBandsAgent.html", o);
 
                 o = "";
-                results.forEach(function(res, i) {
-                    o += res.ma+","+res.std+","+res.profit+","+res.maxAmount+","+res.return+",";
-                    o += (res.return/res.maxAmount);
-                    o += "\n";
+                results.forEach(function(trans, i) {
+                    trans.forEach(function(t, i) {
+                        o += t.extra.ma+","+t.extra.std+","+t.profitOrLoss+","+t.return+",";
+                        o += "\n";
+                    });
                 });
                 utils.writeFile(filePrefix+"backTestingBollingerBandsAgent.tsv", o);
 
