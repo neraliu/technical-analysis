@@ -24,8 +24,56 @@ body {
 }
 
 </style>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link rel="icon" href="../../favicon.ico">
+
+  <title>Stock Dashboard (Line Chart)</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="/stylesheets/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="/stylesheets/blog.css" rel="stylesheet">
+  <script src="http://d3js.org/d3.v3.js"></script>
+</head>
 <body>
-<script src="http://d3js.org/d3.v3.js"></script>
+<div class="blog-masthead">
+  <div class="container">
+    <nav class="blog-nav">
+      <a class="blog-nav-item active" href="/index.html">Home</a>
+    </nav>
+  </div>
+</div>
+<div class="container">
+  <div class="blog-header">
+    <h3 class="blog-title">###STOCKID###</h3>
+  </div>
+  <div class="row">
+    <div class="col-sm-12 blog-main">
+      <div class="blog-post">
+      <div id="chart"/>
+      </div>
+      <div class="blog-post">
+      ###STOCKINFO###
+      </div>
+    </div><!-- /.blog-main -->
+  </div>
+</div>
+<footer class="blog-footer">
+</footer>
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="/javascripts/bootstrap.min.js"></script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="/javascripts/ie10-viewport-bug-workaround.js"></script>
 <script>
 
 var margin = {top: 20, right: 20, bottom: 30, left: 50},
@@ -52,7 +100,7 @@ var line = d3.svg.line()
     .x(function(d) { return x(d.date); })
     .y(function(d) { return y(d.close); });
 
-var svg = d3.select("body").append("svg")
+var svg = d3.select("#chart").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
@@ -87,5 +135,6 @@ d3.tsv("line.tsv", function(error, data) {
       .attr("class", "line")
       .attr("d", line);
 });
-
 </script>
+</body>
+</html>

@@ -121,18 +121,17 @@ var Promise = require('promise'),
                 utils.writeFile(filePrefix+"line.tsv", o);
 
                 // line.html
-                fs.existsSync(filePrefix+"line.html") !== true ? '' : o = fs.readFileSync(fileTemplatePrefix+"line.tmpl").toString();
-                o += "<h1>"+target.symbol+"</h1>";
-                o += "<table>";
-                o += "<tr><td>Data Size</td><td>"+dataSample.length+"</td></tr>";
-                o += "<tr><td>Current Price</td><td>"+dataSample[dataSample.length-1]+"</td></tr>";
+                o = fs.readFileSync(fileTemplatePrefix+"line.tmpl").toString();
+                o = o.replace("###STOCKID###", target.symbol);
+                var stockInfo = "<table>";
+                stockInfo += "<tr><td>Data Size</td><td>"+dataSample.length+"</td></tr>";
+                stockInfo += "<tr><td>Current Price</td><td>"+dataSample[dataSample.length-1]+"</td></tr>";
                 var r = ta.max(dataSample, dataSample.length); 
-                o += "<tr><td>Max Price</td><td>"+r[r.length-1]+"</td></tr>";
+                stockInfo += "<tr><td>Max Price</td><td>"+r[r.length-1]+"</td></tr>";
                 r = ta.min(dataSample, dataSample.length); 
-                o += "<tr><td>Min Price</td><td>"+r[r.length-1]+"</td></tr>";
-                o += "</table>";
-                o += "<a href='./index.html'>back</a>";
-                o += "</body></html>";
+                stockInfo += "<tr><td>Min Price</td><td>"+r[r.length-1]+"</td></tr>";
+                stockInfo += "</table>";
+                o = o.replace("###STOCKINFO###", stockInfo);
                 utils.writeFile(filePrefix+"line.html", o);
                 return Promise.resolve();
 
