@@ -1,5 +1,5 @@
-Technical Analysis
-==================
+Technical Analysis (this branch is just for FUN!)
+=================================================
 
 technical-analysis is the npm package implementing well known technical analysis formulas.
 
